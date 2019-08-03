@@ -1,7 +1,9 @@
 class Square():
+
     def __init__(self):
         self.numMines = 0;
         self.observed = False;
+
     def __str__(self):
         if self.observed:
             return str(self.numMines % 10 if self.numMines != 'X' else 'X')
@@ -10,10 +12,13 @@ class Square():
 
 import random
 class Board():
+
     def rowInRange(self, row):
         return 0 <= row < self.size
+
     def colInRange(self, col):
         return 0 <= col < self.size
+
     def inRange(self, rowcol):
         return self.rowInRange(rowcol[0]) and self.colInRange(rowcol[1])
 
@@ -24,7 +29,6 @@ class Board():
     def countAdjs(self, row, col):
         return len([rowcol for rowcol in self.getAdjs(row, col) if self.board[rowcol[0]][rowcol[1]].numMines == 'X'])
 
-
     def findNums(self):
         for row in range(self.size):
             for col in range(self.size):
@@ -32,8 +36,9 @@ class Board():
                     self.board[row][col].numMines = self.countAdjs(row, col)
 
     def __init__(self, size, mines):
-#        random.seed(a = 7)
         self.size = size
+        self.needClear = size * size - mines
+        
         mines = random.sample(range(size * size), mines)
 
         self.board = [[Square() for cols in range(size)] for rows in range(size)]
@@ -48,35 +53,40 @@ class Board():
             print(str(row % 10) + '|' + '|'.join([str(x) for x in self.board[row]]) + '|')
     
 
-    def dfsObservable(self, row, col):
+    def dfsObservable(self, row, col, visited):
         queue = [(row, col)]
-        visited = set()
-        self.board[row][col].observed = True
+
         while queue:
+
             r, c = queue.pop()
             visited.add((r, c))
             adjs = self.getAdjs(r,c)
-            for r, c in adjs:
-                self.board[r][c].observed = True
-                if not self.board[r][c].numMines and not (r, c) in visited:
-                    queue.append((r,c))
 
-    def makeObservable(self, row, col):
+            for r, c in adjs:
+                if (r, c) not in visited:
+                    visited.add((r, c))
+                    self.board[r][c].observed = True
+                    if not self.board[r][c].numMines:
+                        queue.append((r,c))
+
+    def makeObservable(self, row, col, visited):
         self.board[row][col].observed = True
+        visited.add((row, col))
         if not self.board[row][col].numMines:
-            self.dfsObservable(row, col)
+            self.dfsObservable(row, col, visited)
             
                 
 import sys
 if __name__ == '__main__':
-#    size = 20
 
     size = int(sys.argv[1])
     mines = int(sys.argv[2])
     board = Board(size, mines)
     picked = set()
+
     while True:
         board.printBoard()
+
         row = -1
         col = -1
         try:
@@ -87,15 +97,18 @@ if __name__ == '__main__':
         except ValueError:
             print('Valid input is numeric!')
             continue
+
         if (row, col) in picked:
             print('Already picked that!')
             continue
-        picked.add((row, col))
-        board.makeObservable(row, col)
+
+        board.makeObservable(row, col, picked)
+
         if board.board[row][col].numMines == 'X':
             print('GAME OVER!')
             break
-        if len(picked) == size * size - size:
+        if board.needClear == len(picked):
             print('You WIN!')
             break
+
     board.printBoard()
