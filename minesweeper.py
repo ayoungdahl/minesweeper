@@ -58,11 +58,10 @@ class Board():
 
         while queue:
 
-            r, c = queue.pop()
-            visited.add((r, c))
-            adjs = self.getAdjs(r,c)
+            r1, c1 = queue.pop()
+            visited.add((r1, c1))
 
-            for r, c in adjs:
+            for r, c in self.getAdjs(r1, c1):
                 if (r, c) not in visited:
                     visited.add((r, c))
                     self.board[r][c].observed = True
