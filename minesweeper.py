@@ -74,6 +74,23 @@ class Board():
         if not self.board[row][col].numMines:
             self.dfsObservable(row, col, visited)
             
+    def getPlayerMove(self, picked):
+        while True:
+            rowcol = input('Next move? ').split()
+            try:
+                row = int(rowcol[0])
+                col = int(rowcol[1])
+            except ValueError:
+                print('Valid input is numeric!')
+
+            if (row, col) in picked:
+                print('Already picked that!')
+            elif self.inRange((row, col)):
+                return row, col
+
+
+        
+
                 
 import sys
 if __name__ == '__main__':
@@ -85,22 +102,7 @@ if __name__ == '__main__':
 
     while True:
         board.printBoard()
-
-        row = -1
-        col = -1
-        try:
-            while not board.rowInRange(row):
-                row = int(input('Pick a row '))
-            while not board.colInRange(col):
-                col = int(input('Pick a col '))
-        except ValueError:
-            print('Valid input is numeric!')
-            continue
-
-        if (row, col) in picked:
-            print('Already picked that!')
-            continue
-
+        row, col = board.getPlayerMove(picked)
         board.makeObservable(row, col, picked)
 
         if board.board[row][col].numMines == 'X':
